@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red Bull - Gives You Wings</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --red: #db0032;
+    --dark-red: #a30026;
+    --navy: #0b1128;
+    --dark-navy: #060a1a;
+    --blue: #1e3a8a;
+    --gold: #f5c518;
+    --white: #ffffff;
+    --gray: #a0aec0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--dark-navy);
+    color: var(--white);
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── Custom Scrollbar ── */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--dark-navy); }
+  ::-webkit-scrollbar-thumb { background: var(--red); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--dark-red); }
+
+  /* ── Preloader ── */
+  #preloader {
+    position: fixed; inset: 0;
+    background: var(--dark-navy);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10000;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+  #preloader.hidden { opacity: 0; visibility: hidden; }
+  .loader {
+    width: 60px; height: 60px;
+    border: 4px solid rgba(219,0,50,0.2);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Floating Particles ── */
+  #particles {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 0;
+  }
+  .particle {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: var(--red);
+    border-radius: 50%;
+    opacity: 0;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0% { opacity: 0; transform: translateY(0) scale(0); }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.2; }
+    100% { opacity: 0; transform: translateY(-100vh) scale(1.5); }
+  }
+
+  /* ── Cursor Glow ── */
+  #cursor-glow {
+    position: fixed;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(219,0,50,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    transition: opacity 0.3s;
+  }
+
+  /* ── Navigation ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    padding: 1rem 3rem;
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 1000;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+  }
+  nav.scrolled {
+    background: rgba(6,10,26,0.95);
+    backdrop-filter: blur(20px);
+    padding: 0.7rem 3rem;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+  }
+  .nav-logo {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.6rem; font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--white);
+    text-transform: uppercase;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .nav-logo span { color: var(--red); }
+  .nav-links {
+    display: flex; gap: 2.5rem; list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none; color: var(--gray);
+    font-size: 0.85rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    position: relative;
+    transition: color 0.3s;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute; bottom: -4px; left: 0;
+    width: 0; height: 2px;
+    background: var(--red);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* ── Mobile Menu ── */
+  .menu-toggle {
+    display: none;
+    flex-direction: column; gap: 5px;
+    cursor: pointer; background: none; border: none;
+    padding: 5px; z-index: 1001;
+  }
+  .menu-toggle span {
+    display: block; width: 28px; height: 2px;
+    background: var(--white);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+  }
+  .menu-toggle.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .menu-toggle.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .menu-toggle.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* ── Hero Section ── */
+  #hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(219,0,50,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 30%, rgba(30,58,138,0.15) 0%, transparent 60%),
+                var(--dark-navy);
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(219,0,50,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(219,0,50,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridMove 20s linear infinite;
+  }
+  @keyframes gridMove {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(60px, 60px); }
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    text-align: center;
+    padding: 0 2rem;
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 0.4rem 1.2rem;
+    border: 1px solid rgba(219,0,50,0.4);
+    border-radius: 50px;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 2rem;
+    opacity: 0; transform: translateY(20px);
+    animation: fadeUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+  }
+  .hero-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(3rem, 10vw, 8rem);
+    font-weight: 700;
+    line-height: 0.95;
+    text-transform: uppercase;
+    letter-spacing: -2px;
+    margin-bottom: 1.5rem;
+    opacity: 0; transform: translateY(40px);
+    animation: fadeUp 1s cubic-bezier(0.4, 0, 0.2, 1) 0.7s forwards;
+  }
+  .hero-title .highlight {
+    background: linear-gradient(135deg, var(--red), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    color: var(--gray);
+    max-width: 550px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+    font-weight: 300;
+    opacity: 0; transform: translateY(30px);
+    animation: fadeUp 1s cubic-bezier(0.4, 0, 0.2, 1) 0.9s forwards;
+  }
+  .hero-buttons {
+    display: flex; gap: 1rem;
+    justify-content: center; flex-wrap: wrap;
+    opacity: 0; transform: translateY(30px);
+    animation: fadeUp 1s cubic-bezier(0.4, 0, 0.2, 1) 1.1s forwards;
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.9rem 2.2rem;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: none; cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+  .btn:hover::before { transform: translateX(0); }
+  .btn-primary {
+    background: var(--red);
+    color: var(--white);
+    box-shadow: 0 4px 25px rgba(219,0,50,0.4);
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 35px rgba(219,0,50,0.6);
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--white);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .btn-outline:hover {
+    border-color: var(--red);
+    color: var(--red);
+    transform: translateY(-3px);
+  }
+
+  /* ── Scroll Indicator ── */
+  .scroll-indicator {
+    position: absolute;
+    bottom: 2rem; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 1.5s forwards;
+  }
+  .scroll-indicator span {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--gray);
+  }
+  .scroll-line {
+    width: 1px; height: 50px;
+    background: linear-gradient(to bottom, var(--red), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(0.5); }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  /* ── Section Common ── */
+  section {
+    position: relative;
+    padding: 8rem 3rem;
+    z-index: 2;
+  }
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+  .section-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    margin-bottom: 1rem;
+  }
+  .section-desc {
+    color: var(--gray);
+    max-width: 550px;
+    line-height: 1.8;
+    font-weight: 300;
+    font-size: 0.95rem;
+  }
+
+  /* ── Reveal on Scroll ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(60px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-left {
+    opacity: 0;
+    transform: translateX(-60px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .reveal-left.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .reveal-right {
+    opacity: 0;
+    transform: translateX(60px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .reveal-right.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .reveal-scale {
+    opacity: 0;
+    transform: scale(0.85);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .reveal-scale.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* ── Stats Bar ── */
+  #stats {
+    padding: 4rem 3rem;
+    background: linear-gradient(135deg, rgba(219,0,50,0.08), rgba(30,58,138,0.05));
+    border-top: 1px solid rgba(219,0,50,0.1);
+    border-bottom: 1px solid rgba(219,0,50,0.1);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .stat-item {
+    padding: 1.5rem;
+  }
+  .stat-number {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .stat-number .accent { color: var(--red); }
+  .stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--gray);
+  }
+
+  /* ── Products Section ── */
+  #products {
+    background: var(--dark-navy);
+  }
+  .products-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .product-card {
+    background: linear-gradient(145deg, rgba(11,17,40,0.8), rgba(6,10,26,0.9));
+    border: 1px solid rgba(219,0,50,0.1);
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .product-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--red), transparent);
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .product-card:hover::before { opacity: 1; }
+  .product-card:hover {
+    transform: translateY(-10px);
+    border-color: rgba(219,0,50,0.3);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(219,0,50,0.1);
+  }
+  .product-icon {
+    width: 80px; height: 80px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    transition: all 0.5s;
+  }
+  .product-card:hover .product-icon {
+    transform: scale(1.1) rotate(5deg);
+  }
+  .product-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.8rem;
+  }
+  .product-desc {
+    color: var(--gray);
+    font-size: 0.85rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+  .product-tag {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* ── Energy Meter Interactive ── */
+  #energy {
+    background: linear-gradient(180deg, var(--dark-navy), var(--navy), var(--dark-navy));
+    text-align: center;
+    overflow: hidden;
+  }
+  .energy-container {
+    max-width: 600px;
+    margin: 3rem auto 0;
+  }
+  .energy-bar-track {
+    width: 100%;
+    height: 24px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    border: 1px solid rgba(219,0,50,0.15);
+  }
+  .energy-bar-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 12px;
+    background: linear-gradient(90deg, var(--red), var(--gold));
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: 0 0 20px rgba(219,0,50,0.5);
+  }
+  .energy-bar-fill::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+    animation: shimmer 2s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .energy-level {
+    font-family: 'Oswald', sans-serif;
+    font-size: 5rem;
+    font-weight: 700;
+    margin: 1.5rem 0 0.5rem;
+    background: linear-gradient(135deg, var(--red), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .energy-label {
+    color: var(--gray);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+  .energy-btn {
+    margin-top: 2rem;
+    padding: 1rem 3rem;
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .energy-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(219,0,50,0.5);
+  }
+  .energy-btn:active {
+    transform: scale(0.97);
+  }
+  .energy-btn.maxed {
+    background: linear-gradient(135deg, var(--gold), var(--red));
+    animation: pulse 0.6s ease-in-out;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 30px rgba(219,0,50,0.5); }
+    50% { box-shadow: 0 0 60px rgba(245,197,24,0.8); }
+  }
+
+  /* ── Sports / Events ── */
+  #sports {
+    background: var(--dark-navy);
+  }
+  .sports-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .sports-carousel {
+    display: flex;
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 1rem;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .sports-carousel::-webkit-scrollbar { display: none; }
+  .sport-card {
+    min-width: 300px;
+    height: 400px;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    transition: transform 0.5s;
+  }
+  .sport-card:hover { transform: scale(1.03); }
+  .sport-card-bg {
+    position: absolute; inset: 0;
+    transition: transform 0.6s;
+  }
+  .sport-card:hover .sport-card-bg { transform: scale(1.1); }
+  .sport-card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(6,10,26,0.95) 0%, rgba(6,10,26,0.3) 50%, transparent 100%);
+    z-index: 1;
+  }
+  .sport-card-content {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 2rem;
+    z-index: 2;
+  }
+  .sport-tag {
+    display: inline-block;
+    padding: 0.25rem 0.7rem;
+    background: var(--red);
+    color: var(--white);
+    border-radius: 3px;
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+  }
+  .sport-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .sport-desc {
+    color: var(--gray);
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+
+  /* ── Timeline ── */
+  #history {
+    background: var(--dark-navy);
+    overflow: hidden;
+  }
+  .history-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .timeline {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--red), rgba(219,0,50,0.1));
+  }
+  .timeline-item {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 0 3rem;
+    width: 50%;
+    position: relative;
+  }
+  .timeline-item:nth-child(odd) {
+    align-self: flex-end;
+    justify-content: flex-start;
+    margin-left: 50%;
+    padding-left: 3rem;
+  }
+  .timeline-item:nth-child(even) {
+    padding-right: 3rem;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: var(--red);
+    border-radius: 50%;
+    border: 3px solid var(--dark-navy);
+    z-index: 2;
+    box-shadow: 0 0 15px rgba(219,0,50,0.5);
+  }
+  .timeline-item:nth-child(odd)::before {
+    left: -7px;
+  }
+  .timeline-item:nth-child(even)::before {
+    right: -7px;
+  }
+  .timeline-content {
+    background: rgba(11,17,40,0.6);
+    border: 1px solid rgba(219,0,50,0.1);
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: all 0.4s;
+  }
+  .timeline-content:hover {
+    border-color: rgba(219,0,50,0.3);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  .timeline-year {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--red);
+    margin-bottom: 0.3rem;
+  }
+  .timeline-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+  .timeline-text {
+    color: var(--gray);
+    font-size: 0.8rem;
+    line-height: 1.7;
+  }
+
+  /* ── Newsletter / CTA ── */
+  #cta {
+    background: linear-gradient(135deg, var(--navy), var(--dark-navy));
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  #cta::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(219,0,50,0.1), transparent 70%);
+    top: -200px; right: -200px;
+    animation: ctaGlow 6s ease-in-out infinite alternate;
+  }
+  @keyframes ctaGlow {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(1.3); opacity: 1; }
+  }
+  .cta-content {
+    position: relative; z-index: 2;
+  }
+  .cta-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .cta-desc {
+    color: var(--gray);
+    max-width: 500px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.8;
+    font-size: 0.95rem;
+  }
+  .cta-form {
+    display: flex;
+    max-width: 480px;
+    margin: 0 auto;
+    gap: 0.5rem;
+  }
+  .cta-input {
+    flex: 1;
+    padding: 0.9rem 1.2rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px;
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .cta-input::placeholder { color: rgba(255,255,255,0.3); }
+  .cta-input:focus { border-color: var(--red); }
+  .cta-submit {
+    padding: 0.9rem 1.8rem;
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  .cta-submit:hover {
+    background: var(--dark-red);
+    transform: translateY(-2px);
+  }
+  .cta-success {
+    display: none;
+    color: var(--gold);
+    margin-top: 1rem;
+    font-size: 0.85rem;
+  }
+  .cta-success.show { display: block; animation: fadeUp 0.5s; }
+
+  /* ── Footer ── */
+  footer {
+    background: rgba(6,10,26,0.98);
+    border-top: 1px solid rgba(219,0,50,0.08);
+    padding: 4rem 3rem 2rem;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+    max-width: 1200px;
+    margin: 0 auto 3rem;
+  }
+  .footer-brand {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .footer-brand span { color: var(--red); }
+  .footer-about {
+    color: var(--gray);
+    font-size: 0.8rem;
+    line-height: 1.8;
+    max-width: 300px;
+  }
+  .footer-heading {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 1.2rem;
+    color: var(--white);
+  }
+  .footer-links {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 0.6rem;
+  }
+  .footer-links a {
+    color: var(--gray);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--red); }
+  .footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    color: var(--gray);
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+  }
+
+  /* ── Back to Top ── */
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem; right: 2rem;
+    width: 45px; height: 45px;
+    background: var(--red);
+    border: none;
+    border-radius: 50%;
+    color: var(--white);
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+    box-shadow: 0 4px 20px rgba(219,0,50,0.4);
+  }
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .back-to-top:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(219,0,50,0.6);
+  }
+
+  /* ── Tilt Hover ── */
+  .tilt {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    nav.scrolled { padding: 0.7rem 1.5rem; }
+    .nav-links { display: none; }
+    .menu-toggle { display: flex; }
+    .nav-links.open {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      inset: 0;
+      background: rgba(6,10,26,0.98);
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      z-index: 999;
+    }
+    .nav-links.open a {
+      font-size: 1.2rem;
+      color: var(--white);
+    }
+    section { padding: 5rem 1.5rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .timeline::before { left: 20px; }
+    .timeline-item,
+    .timeline-item:nth-child(odd) {
+      width: 100%;
+      margin-left: 0;
+      padding-left: 3.5rem;
+      padding-right: 0;
+      justify-content: flex-start;
+    }
+    .timeline-item::before,
+    .timeline-item:nth-child(even)::before,
+    .timeline-item:nth-child(odd)::before {
+      left: 13px; right: auto;
+    }
+    .cta-form { flex-direction: column; }
+  }
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .hero-buttons { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Preloader -->
+<div id="preloader"><div class="loader"></div></div>
+
+<!-- Cursor Glow -->
+<div id="cursor-glow"></div>
+
+<!-- Floating Particles -->
+<div id="particles"></div>
+
+<!-- Navigation -->
+<nav id="navbar">
+  <div class="nav-logo">Red<span>Bull</span></div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#energy">Energy</a></li>
+    <li><a href="#sports">Sports</a></li>
+    <li><a href="#history">History</a></li>
+    <li><a href="#cta">Join</a></li>
+  </ul>
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Since 1987</div>
+    <h1 class="hero-title">Gives You<br><span class="highlight">Wings</span></h1>
+    <p class="hero-subtitle">Unleash your potential with the world's leading energy drink. Fuel your body, sharpen your mind, and push beyond every limit.</p>
+    <div class="hero-buttons">
+      <a href="#products" class="btn btn-primary">Explore Products &#8599;</a>
+      <a href="#energy" class="btn btn-outline">Feel the Energy</a>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat-item reveal">
+      <div class="stat-number"><span class="accent" data-count="12">0</span>B+</div>
+      <div class="stat-label">Cans Sold Yearly</div>
+    </div>
+    <div class="stat-item reveal" style="transition-delay: 0.1s">
+      <div class="stat-number"><span class="accent" data-count="172">0</span>+</div>
+      <div class="stat-label">Countries</div>
+    </div>
+    <div class="stat-item reveal" style="transition-delay: 0.2s">
+      <div class="stat-number"><span class="accent" data-count="600">0</span>+</div>
+      <div class="stat-label">Athletes</div>
+    </div>
+    <div class="stat-item reveal" style="transition-delay: 0.3s">
+      <div class="stat-number"><span class="accent" data-count="37">0</span>+</div>
+      <div class="stat-label">Years of Wings</div>
+    </div>
+  </div>
+</section>
+
+<!-- Products -->
+<section id="products">
+  <div class="products-header reveal">
+    <div class="section-label">Our Lineup</div>
+    <div class="section-title">Fuel Your Fire</div>
+    <p class="section-desc" style="margin: 0 auto;">Every can is crafted to give you exactly the boost you need, whenever you need it.</p>
+  </div>
+  <div class="products-grid">
+    <div class="product-card reveal tilt" style="transition-delay: 0.05s">
+      <div class="product-icon" style="background: linear-gradient(135deg, rgba(219,0,50,0.2), rgba(219,0,50,0.05));">&#9889;</div>
+      <div class="product-name">Original</div>
+      <p class="product-desc">The iconic taste that started it all. A unique blend of caffeine, taurine, B-vitamins, and alpine water.</p>
+      <span class="product-tag" style="background: rgba(219,0,50,0.15); color: var(--red);">Classic</span>
+    </div>
+    <div class="product-card reveal tilt" style="transition-delay: 0.15s">
+      <div class="product-icon" style="background: linear-gradient(135deg, rgba(245,197,24,0.2), rgba(245,197,24,0.05));">&#9728;</div>
+      <div class="product-name">Tropical Edition</div>
+      <p class="product-desc">A burst of tropical fruit flavor with the same powerful energy formula you know and love.</p>
+      <span class="product-tag" style="background: rgba(245,197,24,0.15); color: var(--gold);">Summer Hit</span>
+    </div>
+    <div class="product-card reveal tilt" style="transition-delay: 0.25s">
+      <div class="product-icon" style="background: linear-gradient(135deg, rgba(0,200,150,0.2), rgba(0,200,150,0.05));">&#127811;</div>
+      <div class="product-name">Sugar Free</div>
+      <p class="product-desc">All the wings, none of the sugar. Same great energy with zero sugar and only 5 calories per can.</p>
+      <span class="product-tag" style="background: rgba(0,200,150,0.15); color: #00c896;">Zero Sugar</span>
+    </div>
+    <div class="product-card reveal tilt" style="transition-delay: 0.35s">
+      <div class="product-icon" style="background: linear-gradient(135deg, rgba(138,43,226,0.2), rgba(138,43,226,0.05));">&#127752;</div>
+      <div class="product-name">Purple Edition</div>
+      <p class="product-desc">Sweet acai berry meets Red Bull energy. A vibrant twist on the legendary formula.</p>
+      <span class="product-tag" style="background: rgba(138,43,226,0.15); color: #8a2be2;">Fan Fav</span>
+    </div>
+  </div>
+</section>
+
+<!-- Energy Meter -->
+<section id="energy">
+  <div class="reveal">
+    <div class="section-label" style="text-align:center;">Interactive</div>
+    <div class="section-title" style="text-align:center;">Charge Your Energy</div>
+    <p class="section-desc" style="text-align:center; margin: 0 auto;">Click the button to feel the rush. How far can you push it?</p>
+  </div>
+  <div class="energy-container reveal" style="transition-delay:0.2s">
+    <div class="energy-bar-track">
+      <div class="energy-bar-fill" id="energyFill"></div>
+    </div>
+    <div class="energy-level" id="energyLevel">0%</div>
+    <div class="energy-label">Energy Level</div>
+    <button class="energy-btn" id="energyBtn">&#9889; Boost Energy</button>
+  </div>
+</section>
+
+<!-- Sports -->
+<section id="sports">
+  <div class="sports-header reveal">
+    <div class="section-label">Extreme Sports</div>
+    <div class="section-title">Where Legends Are Made</div>
+    <p class="section-desc" style="margin: 0 auto;">Red Bull fuels the world's most daring athletes across every extreme discipline.</p>
+  </div>
+  <div class="sports-carousel" id="sportsCarousel">
+    <div class="sport-card reveal-scale" style="transition-delay: 0.05s">
+      <div class="sport-card-bg" style="background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);"></div>
+      <div class="sport-card-overlay"></div>
+      <div class="sport-card-content">
+        <div class="sport-tag">Formula 1</div>
+        <div class="sport-title">Racing at the Limit</div>
+        <p class="sport-desc">Red Bull Racing has dominated the grid with multiple World Championships, rewriting F1 history.</p>
+      </div>
+    </div>
+    <div class="sport-card reveal-scale" style="transition-delay: 0.15s">
+      <div class="sport-card-bg" style="background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);"></div>
+      <div class="sport-card-overlay"></div>
+      <div class="sport-card-content">
+        <div class="sport-tag">Cliff Diving</div>
+        <div class="sport-title">Gravity Defied</div>
+        <p class="sport-desc">Divers plunge from 27 meters high, performing acrobatic feats before hitting the water below.</p>
+      </div>
+    </div>
+    <div class="sport-card reveal-scale" style="transition-delay: 0.25s">
+      <div class="sport-card-bg" style="background: linear-gradient(135deg, #2d1b69, #11001c, #380036);"></div>
+      <div class="sport-card-overlay"></div>
+      <div class="sport-card-content">
+        <div class="sport-tag">Air Race</div>
+        <div class="sport-title">Speed in the Sky</div>
+        <p class="sport-desc">Pilots navigate through inflatable pylons at incredible speeds in the ultimate aerial motorsport.</p>
+      </div>
+    </div>
+    <div class="sport-card reveal-scale" style="transition-delay: 0.35s">
+      <div class="sport-card-bg" style="background: linear-gradient(135deg, #1a1a2e, #e94560, #533483);"></div>
+      <div class="sport-card-overlay"></div>
+      <div class="sport-card-content">
+        <div class="sport-tag">Skateboarding</div>
+        <div class="sport-title">Concrete Waves</div>
+        <p class="sport-desc">From streets to parks, Red Bull athletes push skateboarding into uncharted creative territory.</p>
+      </div>
+    </div>
+    <div class="sport-card reveal-scale" style="transition-delay: 0.45s">
+      <div class="sport-card-bg" style="background: linear-gradient(135deg, #0b0c10, #1f4068, #e8e8e8);"></div>
+      <div class="sport-card-overlay"></div>
+      <div class="sport-card-content">
+        <div class="sport-tag">Snowboarding</div>
+        <div class="sport-title">Mountain Fury</div>
+        <p class="sport-desc">Backcountry lines and massive jumps — Red Bull riders own the frozen peaks year-round.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- History / Timeline -->
+<section id="history">
+  <div class="history-header reveal">
+    <div class="section-label">Our Story</div>
+    <div class="section-title">A Legacy of Energy</div>
+    <p class="section-desc" style="margin: 0 auto;">From a small idea in Thailand to a global phenomenon.</p>
+  </div>
+  <div class="timeline">
+    <div class="timeline-item reveal-left">
+      <div class="timeline-content">
+        <div class="timeline-year">1984</div>
+        <div class="timeline-title">The Discovery</div>
+        <p class="timeline-text">Dietrich Mateschitz discovers Krating Daeng in Thailand and envisions bringing the energy drink to the Western world.</p>
+      </div>
+    </div>
+    <div class="timeline-item reveal-right">
+      <div class="timeline-content">
+        <div class="timeline-year">1987</div>
+        <div class="timeline-title">The Launch</div>
+        <p class="timeline-text">Red Bull Energy Drink is officially sold for the first time in Austria, creating an entirely new product category.</p>
+      </div>
+    </div>
+    <div class="timeline-item reveal-left">
+      <div class="timeline-content">
+        <div class="timeline-year">2004</div>
+        <div class="timeline-title">F1 Racing</div>
+        <p class="timeline-text">Red Bull acquires the Jaguar Racing F1 team, marking the birth of Red Bull Racing and a new era in motorsport.</p>
+      </div>
+    </div>
+    <div class="timeline-item reveal-right">
+      <div class="timeline-content">
+        <div class="timeline-year">2012</div>
+        <div class="timeline-title">Stratos</div>
+        <p class="timeline-text">Felix Baumgartner jumps from the edge of space at 128,100 ft, breaking the sound barrier in freefall.</p>
+      </div>
+    </div>
+    <div class="timeline-item reveal-left">
+      <div class="timeline-content">
+        <div class="timeline-year">2025</div>
+        <div class="timeline-title">Global Icon</div>
+        <p class="timeline-text">Red Bull sells over 12 billion cans annually across 172+ countries, powering athletes and dreamers worldwide.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA / Newsletter -->
+<section id="cta">
+  <div class="cta-content reveal">
+    <div class="section-label">Stay Connected</div>
+    <div class="cta-title">Get Your Wings</div>
+    <p class="cta-desc">Join the Red Bull community for exclusive content, event access, and the latest news from the world of energy.</p>
+    <form class="cta-form" id="ctaForm" onsubmit="return false;">
+      <input type="email" class="cta-input" placeholder="Enter your email" required>
+      <button type="submit" class="cta-submit">Subscribe</button>
+    </form>
+    <div class="cta-success" id="ctaSuccess">&#10003; You're in! Welcome to the Red Bull family.</div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">Red<span>Bull</span></div>
+      <p class="footer-about">Red Bull gives you wings. We are the world's leading energy drink brand, fueling athletes, artists, and adventurers since 1987.</p>
+    </div>
+    <div>
+      <div class="footer-heading">Products</div>
+      <ul class="footer-links">
+        <li><a href="#products">Original</a></li>
+        <li><a href="#products">Sugar Free</a></li>
+        <li><a href="#products">Editions</a></li>
+        <li><a href="#products">Organics</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">Sports</div>
+      <ul class="footer-links">
+        <li><a href="#sports">Formula 1</a></li>
+        <li><a href="#sports">Cliff Diving</a></li>
+        <li><a href="#sports">Skateboarding</a></li>
+        <li><a href="#sports">Esports</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">Company</div>
+      <ul class="footer-links">
+        <li><a href="#history">About Us</a></li>
+        <li><a href="#history">History</a></li>
+        <li><a href="#cta">Contact</a></li>
+        <li><a href="#cta">Careers</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    &copy; 2026 Red Bull. All rights reserved. This is a fan-made concept site.
+  </div>
+</footer>
+
+<!-- Back to Top -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">&#8593;</button>
+
+<script>
+(function() {
+  // ── Preloader ──
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('preloader').classList.add('hidden');
+    }, 600);
+  });
+
+  // ── Cursor Glow ──
+  const glow = document.getElementById('cursor-glow');
+  let mouseX = 0, mouseY = 0, glowX = 0, glowY = 0;
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+  function animateGlow() {
+    glowX += (mouseX - glowX) * 0.08;
+    glowY += (mouseY - glowY) * 0.08;
+    glow.style.left = glowX + 'px';
+    glow.style.top = glowY + 'px';
+    requestAnimationFrame(animateGlow);
+  }
+  animateGlow();
+
+  // ── Floating Particles ──
+  const particlesContainer = document.getElementById('particles');
+  function createParticle() {
+    const p = document.createElement('div');
+    p.classList.add('particle');
+    p.style.left = Math.random() * 100 + '%';
+    p.style.bottom = '-10px';
+    p.style.animationDuration = (6 + Math.random() * 8) + 's';
+    p.style.animationDelay = Math.random() * 3 + 's';
+    const size = 2 + Math.random() * 3;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    if (Math.random() > 0.6) p.style.background = '#f5c518';
+    particlesContainer.appendChild(p);
+    setTimeout(() => p.remove(), 16000);
+  }
+  setInterval(createParticle, 400);
+
+  // ── Navbar Scroll ──
+  const navbar = document.getElementById('navbar');
+  const backToTop = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    navbar.classList.toggle('scrolled', scrollY > 80);
+    backToTop.classList.toggle('visible', scrollY > 500);
+  });
+
+  // ── Back to Top ──
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ── Mobile Menu ──
+  const menuToggle = document.getElementById('menuToggle');
+  const navLinks = document.getElementById('navLinks');
+  menuToggle.addEventListener('click', () => {
+    menuToggle.classList.toggle('active');
+    navLinks.classList.toggle('open');
+  });
+  navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      menuToggle.classList.remove('active');
+      navLinks.classList.remove('open');
+    });
+  });
+
+  // ── Scroll Reveal ──
+  const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+  revealElements.forEach(el => observer.observe(el));
+
+  // ── Count-Up Animation ──
+  const countElements = document.querySelectorAll('[data-count]');
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.getAttribute('data-count'));
+        let current = 0;
+        const duration = 2000;
+        const step = target / (duration / 16);
+        function tick() {
+          current += step;
+          if (current >= target) {
+            el.textContent = target;
+            return;
+          }
+          el.textContent = Math.floor(current);
+          requestAnimationFrame(tick);
+        }
+        tick();
+        countObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  countElements.forEach(el => countObserver.observe(el));
+
+  // ── Energy Meter ──
+  let energy = 0;
+  const fill = document.getElementById('energyFill');
+  const level = document.getElementById('energyLevel');
+  const btn = document.getElementById('energyBtn');
+  btn.addEventListener('click', () => {
+    if (energy >= 100) {
+      energy = 0;
+      btn.classList.remove('maxed');
+      btn.innerHTML = '&#9889; Boost Energy';
+    } else {
+      energy = Math.min(energy + 10 + Math.floor(Math.random() * 10), 100);
+    }
+    fill.style.width = energy + '%';
+    level.textContent = energy + '%';
+    if (energy >= 100) {
+      btn.classList.add('maxed');
+      btn.innerHTML = '&#128640; MAXED OUT! Reset?';
+      confettiBurst();
+    }
+    btn.style.transform = 'scale(0.95)';
+    setTimeout(() => btn.style.transform = '', 150);
+  });
+
+  // ── Mini Confetti ──
+  function confettiBurst() {
+    const colors = ['#db0032', '#f5c518', '#ffffff', '#1e3a8a'];
+    for (let i = 0; i < 50; i++) {
+      const confetti = document.createElement('div');
+      confetti.style.cssText = `
+        position: fixed;
+        width: ${4 + Math.random() * 6}px;
+        height: ${4 + Math.random() * 6}px;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        left: 50%;
+        top: 50%;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 1;
+        transition: all ${0.8 + Math.random() * 0.8}s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      `;
+      document.body.appendChild(confetti);
+      requestAnimationFrame(() => {
+        confetti.style.left = (50 + (Math.random() - 0.5) * 80) + '%';
+        confetti.style.top = (50 + (Math.random() - 0.5) * 80) + '%';
+        confetti.style.opacity = '0';
+        confetti.style.transform = `rotate(${Math.random() * 720}deg)`;
+      });
+      setTimeout(() => confetti.remove(), 2000);
+    }
+  }
+
+  // ── Tilt Effect on Product Cards ──
+  document.querySelectorAll('.tilt').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = (y - centerY) / centerY * -6;
+      const rotateY = (x - centerX) / centerX * 6;
+      card.style.transform = `translateY(-10px) perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+
+  // ── Sports Carousel Drag ──
+  const carousel = document.getElementById('sportsCarousel');
+  let isDown = false, startX, scrollLeft;
+  carousel.addEventListener('mousedown', e => {
+    isDown = true;
+    startX = e.pageX - carousel.offsetLeft;
+    scrollLeft = carousel.scrollLeft;
+    carousel.style.cursor = 'grabbing';
+  });
+  carousel.addEventListener('mouseleave', () => { isDown = false; carousel.style.cursor = ''; });
+  carousel.addEventListener('mouseup', () => { isDown = false; carousel.style.cursor = ''; });
+  carousel.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - carousel.offsetLeft;
+    carousel.scrollLeft = scrollLeft - (x - startX) * 1.5;
+  });
+
+  // ── CTA Form ──
+  document.getElementById('ctaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const input = this.querySelector('.cta-input');
+    if (input.value) {
+      document.getElementById('ctaSuccess').classList.add('show');
+      input.value = '';
+      setTimeout(() => document.getElementById('ctaSuccess').classList.remove('show'), 4000);
+    }
+  });
+
+  // ── Smooth Anchor Scrolling ──
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(anchor.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
